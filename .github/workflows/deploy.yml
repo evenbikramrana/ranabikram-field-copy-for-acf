@@ -1,15 +1,23 @@
 name: Deploy to WordPress.org
 
-# Fires when you push a version tag (e.g. `git tag 1.0.1 && git push origin 1.0.1`).
-# The 10up action syncs your files into SVN trunk, creates tags/<version>,
-# and pushes .wordpress-org/ into the SVN assets/ directory.
+# Real releases: push a version tag (e.g. `git tag 1.0.1 && git push origin 1.0.1`).
+# Safe testing: Actions tab -> "Deploy to WordPress.org" -> "Run workflow".
+#   - A manual run is ALWAYS a dry-run: it packages everything and reports what it
+#     WOULD deploy, but never commits to SVN. (Dry-run doesn't even need secrets.)
+#   - A tag push ALWAYS publishes for real.
 on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (package only, no SVN commit)'
+        type: boolean
+        default: true
 
 permissions:
-  contents: write   # needed to create the GitHub Release below
+  contents: write   # needed to create the GitHub Release on real tag pushes
 
 jobs:
   deploy:
@@ -24,14 +32,16 @@ jobs:
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
           generate-zip: true
+          # true for manual runs, false for tag pushes -> no line to remember.
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: ranabikram-field-copy-for-acf
 
-      # Optional: also publish the exact deployed ZIP as a GitHub Release asset,
-      # so GitHub and WordPress.org ship byte-identical packages.
+      # Only on real tag pushes — skipped during manual dry-run tests.
       - name: Create GitHub Release with the built ZIP
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.deploy.outputs.zip-path }}
