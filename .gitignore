@@ -1,0 +1,8 @@
+# Local/dev noise — not the same as .distignore (which controls the SHIP list).
+node_modules/
+vendor/
+.DS_Store
+*.log
+.idea/
+.vscode/
+*.zip

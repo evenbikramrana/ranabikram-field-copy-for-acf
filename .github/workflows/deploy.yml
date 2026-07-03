@@ -1,0 +1,38 @@
+name: Deploy to WordPress.org
+
+# Fires when you push a version tag (e.g. `git tag 1.0.1 && git push origin 1.0.1`).
+# The 10up action syncs your files into SVN trunk, creates tags/<version>,
+# and pushes .wordpress-org/ into the SVN assets/ directory.
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write   # needed to create the GitHub Release below
+
+jobs:
+  deploy:
+    name: Deploy to WordPress.org
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: WordPress Plugin Deploy
+        id: deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        with:
+          generate-zip: true
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: ranabikram-field-copy-for-acf
+
+      # Optional: also publish the exact deployed ZIP as a GitHub Release asset,
+      # so GitHub and WordPress.org ship byte-identical packages.
+      - name: Create GitHub Release with the built ZIP
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.deploy.outputs.zip-path }}
+          generate_release_notes: true

@@ -1,0 +1,25 @@
+name: Plugin Check
+
+# Quality gate: runs the same Plugin Check that WordPress.org runs on
+# submissions, on every pull request and every push to main.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  plugin-check:
+    name: Run Plugin Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        # By default every check runs. To focus only on the checks that gate
+        # directory submission, uncomment:
+        # with:
+        #   categories: |
+        #     plugin_repo

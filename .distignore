@@ -1,0 +1,18 @@
+# Files & folders that must NOT ship in the WordPress.org download.
+# The 10up deploy action honours this when syncing to SVN trunk.
+# NOTE: the plugin's own /assets folder (copy-field.js/css) is intentionally
+# NOT listed here — it is part of the plugin and must ship.
+
+/.git
+/.github
+/.wordpress-org
+/.distignore
+/.gitignore
+/.gitattributes
+/.editorconfig
+/README.md
+/SETUP.md
+/node_modules
+/tests
+/.vscode
+.DS_Store

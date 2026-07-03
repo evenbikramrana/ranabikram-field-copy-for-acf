@@ -1,0 +1,27 @@
+name: Update readme & assets
+
+# OPTIONAL. Lets you change the store listing — description text, banner, icon,
+# screenshots — WITHOUT cutting a new plugin release. Runs when you push changes
+# to readme.txt or the artwork in .wordpress-org/ on main.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'readme.txt'
+      - '.wordpress-org/**'
+
+jobs:
+  assets:
+    name: Push readme & assets to WordPress.org
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update WordPress.org readme & assets
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: ranabikram-field-copy-for-acf
+          IGNORE_OTHER_FILES: true   # only touch readme + assets, ignore code diffs
